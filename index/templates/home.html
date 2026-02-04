@@ -13,12 +13,21 @@
             <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
                 <li><a href="/" class="nav-link px-2 text-secondary">Главная</a></li>
             </ul>
-            <form class="col-12 col-lg-auto mb-3 mb-lg-0 me-lg-3" role="search">
-                <input type="search" class="form-control form-control-dark text-bg-dark" placeholder="Поиск..." aria-label="Search"></form>
+            <form class="col-12 col-lg-auto mb-3 mb-lg-0 me-lg-3" role="search" action="/search" method="post">
+                {% csrf_token %}
+                <input name="search_product" required type="search" class="form-control form-control-dark text-bg-dark" placeholder="Поиск..." aria-label="Search">
+            </form>
+            {% if user.is_authenticated %}
             <div class="text-end">
-                <button type="button" class="btn btn-outline-light me-2">Войти</button>
-                <button type="button" class="btn btn-warning">Зарегистрироваться</button>
+                <button type="button" class="btn btn-primary me-2">Корзина</button>
+                <a href="/logout" class="btn btn-danger" role="button">Выйти</a>
             </div>
+            {% else %}
+            <div class="text-end">
+                <a href="/register" class="btn btn-warning me-2" role="button">Регистрация</a>
+                <a href="/accounts/login" class="btn btn-light" role="button">Войти</a>
+            </div>
+            {% endif %}
         </div>
     </div>
 </header>
