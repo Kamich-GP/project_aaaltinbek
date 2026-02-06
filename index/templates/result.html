@@ -19,7 +19,7 @@
             </form>
             {% if user.is_authenticated %}
             <div class="text-end">
-                <button type="button" class="btn btn-primary me-2">Корзина</button>
+                <a href="/cart" class="btn btn-primary me-2" role="button">Корзина</a>
                 <a href="/logout" class="btn btn-danger" role="button">Выйти</a>
             </div>
             {% else %}

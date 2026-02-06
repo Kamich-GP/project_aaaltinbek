@@ -19,7 +19,7 @@
             </form>
             {% if user.is_authenticated %}
             <div class="text-end">
-                <button type="button" class="btn btn-primary me-2">Корзина</button>
+                <a href="/cart" class="btn btn-primary me-2" role="button">Корзина</a>
                 <a href="/logout" class="btn btn-danger" role="button">Выйти</a>
             </div>
             {% else %}
@@ -44,10 +44,21 @@
             <p class="lead">Категория:
                 <a href="/category/{{ product.product_category.id }}">{{ product.product_category }}</a>
             </p>
+            {% if user.is_authenticated %}
             <div class="d-grid gap-2 d-md-flex justify-content-md-start">
-                <button type="button" class="btn btn-primary btn-lg px-4 me-md-2">Купить</button>
+                <form action="/add-to-cart/{{ product.id }}" method="post">
+                    {% csrf_token %}
+                    <input type="number" name="pr_amount" min="1" max="{{ product.product_count }}" value="1" class="form-control w-25 mb-3" required>
+                    <button type="submit" class="btn btn-primary btn-lg px-4 me-md-2">Добавить в корзину</button>
+                    <button type="button" class="btn btn-outline-secondary btn-lg px-4">${{ product.product_price }}</button>
+                </form>
+            </div>
+            {% else %}
+            <div class="d-grid gap-2 d-md-flex justify-content-md-start">
+                <button type="button" class="btn btn-primary btn-lg px-4">Зарегистрируйтесь или войдите для покупки!</button>
                 <button type="button" class="btn btn-outline-secondary btn-lg px-4">${{ product.product_price }}</button>
             </div>
+            {% endif %}
         </div>
     </div>
 </div>

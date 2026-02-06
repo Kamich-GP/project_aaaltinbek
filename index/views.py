@@ -4,6 +4,10 @@ from django.contrib.auth.models import User
 from django.contrib.auth import login, logout
 from .forms import RegForm
 from django.views import View
+import telebot
+
+bot = telebot.TeleBot('TOKEN')
+admin_id = 'ADMIN_ID'
 
 # Create your views here.
 def home_page(request):
@@ -65,3 +69,42 @@ def search(request):
 def logout_view(request):
     logout(request)
     return redirect('/')
+
+def add_to_cart(request, pk):
+    if request.method == 'POST':
+        product = Product.objects.get(id=pk)
+        user_amount = int(request.POST.get('pr_amount'))
+        if 1 <= user_amount <= product.product_count:
+            Cart.objects.create(user_id=request.user.id,
+                                user_product=product,
+                                user_pr_amount=user_amount).save()
+            return redirect('/')
+    return redirect(f'/product/{pk}')
+
+def del_from_cart(request, pk):
+    Cart.objects.filter(user_product=Product.objects.get(id=pk)).delete()
+    return redirect('/cart')
+
+def cart_page(request):
+    user_cart = Cart.objects.filter(user_id=request.user.id)
+    totals = [round(t.user_pr_amount * t.user_product.product_price, 2) for t in user_cart]
+    context = {}
+    if user_cart:
+        context.update(cart=user_cart, total=round(sum(totals), 2))
+    else:
+        context.update(cart="", total=0)
+    if request.method == 'POST':
+        text = f'Новый заказ!\nКлиент: {User.objects.get(id=request.user.id).email}\n\n'
+        new_totals = []
+        for i in user_cart:
+            product = Product.objects.get(id=i.user_product.id)
+            user_amount = int(request.POST.get(f'amount_{product.id}'))
+            product.product_count = product.product_count - user_amount
+            product.save(update_fields=['product_count'])
+            new_totals.append(round(product.product_price * user_amount, 2))
+            text += f'Товар: {product}\nКоличество: {user_amount}\n'
+        text += f'Итого: ${round(sum(new_totals, 2))}'
+        bot.send_message(admin_id, text)
+        user_cart.delete()
+        return redirect('/')
+    return render(request, 'cart.html', context)
